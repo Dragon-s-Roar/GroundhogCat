@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> 🐱 土拨猫 - 智能表单填写助手</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f0f4f9;
+            min-height: 100vh;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* ===== 主容器 ===== */
+        .main-wrapper {
+            max-width: 1100px;
+            width: 100%;
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        /* ===== 内容区 ===== */
+        .container {
+            background: white;
+            flex: 1;
+            min-width: 0;
+            padding: 30px 28px;
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        /* ===== 侧边栏 ===== */
+        .sidebar {
+            flex-shrink: 0;
+            width: 210px;
+            position: sticky;
+            top: 50%;
+            transform: translateY(-50%);
+            align-self: flex-start;
+            background: white;
+            border-radius: 20px;
+            padding: 18px 16px 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+            border: 1px solid #e6edf6;
+            transition: box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            max-height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+        .sidebar:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10);
+        }
+        .sidebar::-webkit-scrollbar {
+            width: 3px;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #d9e1ec;
+            border-radius: 4px;
+        }
+
+        /* ===== 侧边栏品牌 ===== */
+        .sidebar .brand {
+            font-size: 15px;
+            font-weight: 600;
+            color: #0b1a2f;
+            padding-bottom: 10px;
+            margin-bottom: 6px;
+            border-bottom: 2px solid #f0f4f9;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.3px;
+            flex-shrink: 0;
+        }
+        .sidebar .brand span {
+            font-size: 18px;
+        }
+
+        /* ===== 侧边栏搜索 ===== */
+        .sidebar .sidebar-search {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #f8faff;
+            border: 1px solid #e6edf6;
+            border-radius: 12px;
+            padding: 4px 10px;
+            transition: 0.2s;
+            flex-shrink: 0;
+            margin-bottom: 4px;
+        }
+        .sidebar .sidebar-search:focus-within {
+            border-color: #4f7cff;
+            box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.08);
+            background: white;
+        }
+        .sidebar .sidebar-search .search-icon {
+            font-size: 15px;
+            color: #8895b0;
+            flex-shrink: 0;
+        }
+        .sidebar .sidebar-search input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 6px 0;
+            font-size: 13px;
+            color: #1e2a41;
+            outline: none;
+            font-family: inherit;
+            min-width: 0;
+        }
+        .sidebar .sidebar-search input::placeholder {
+            color: #a0b1cc;
+            font-size: 12px;
+        }
+        .sidebar .sidebar-search .search-clear {
+            background: none;
+            border: none;
+            font-size: 14px;
+            color: #a0b1cc;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 6px;
+            transition: 0.15s;
+            display: none;
+            flex-shrink: 0;
+        }
+        .sidebar .sidebar-search .search-clear:hover {
+            background: #eef3fc;
+            color: #5e6f8d;
+        }
+        .sidebar .sidebar-search .search-clear.visible {
+            display: block;
+        }
+        .sidebar .sidebar-search .search-count {
+            font-size: 11px;
+            color: #8895b0;
+            white-space: nowrap;
+            background: #eef3fc;
+            padding: 1px 8px;
+            border-radius: 20px;
+            flex-shrink: 0;
+        }
+
+        /* ===== 侧边栏按钮 ===== */
+        .sidebar .sidebar-btn {
+            width: 100%;
+            padding: 9px 12px;
+            border: none;
+            border-radius: 12px;
+            background: #f8faff;
+            color: #1e2a41;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-align: left;
+            font-family: inherit;
+            flex-shrink: 0;
+        }
+        .sidebar .sidebar-btn:hover {
+            background: #eef3fc;
+            transform: translateX(2px);
+        }
+        .sidebar .sidebar-btn:active {
+            transform: scale(0.96);
+        }
+        .sidebar .sidebar-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .sidebar .sidebar-btn .icon {
+            font-size: 16px;
+            flex-shrink: 0;
+            width: 22px;
+            text-align: center;
+        }
+
+        .sidebar .sidebar-btn.undo-btn {
+            background: #fef3e0;
+            color: #a0681a;
+        }
+        .sidebar .sidebar-btn.undo-btn:hover:not(:disabled) {
+            background: #fce8c8;
+        }
+
+        .sidebar .sidebar-btn.add-btn {
+            background: #e3edfe;
+            color: #1a4cba;
+        }
+        .sidebar .sidebar-btn.add-btn:hover {
+            background: #d0e0fc;
+        }
+
+        .sidebar .sidebar-btn.save-btn {
+            background: #d3f0df;
+            color: #0a5c33;
+        }
+        .sidebar .sidebar-btn.save-btn:hover {
+            background: #b8e5cb;
+        }
+
+        .sidebar .sidebar-btn.load-btn {
+            background: #e8edf6;
+            color: #2c3e50;
+        }
+        .sidebar .sidebar-btn.load-btn:hover {
+            background: #dce3ef;
+        }
+
+        .sidebar .sidebar-btn.clear-btn {
+            background: #fef0f0;
+            color: #b33a3a;
+        }
+        .sidebar .sidebar-btn.clear-btn:hover {
+            background: #fde2e2;
+        }
+
+        .sidebar .sidebar-divider {
+            height: 1px;
+            background: #ecf1f8;
+            margin: 3px 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar .sidebar-version {
+            font-size: 10px;
+            color: #a0b1cc;
+            text-align: center;
+            margin-top: 4px;
+            padding-top: 8px;
+            border-top: 1px solid #ecf1f8;
+            flex-shrink: 0;
+        }
+
+        /* ===== 头部 ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #0b1a2f;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #5e6f8d;
+        }
+        .header-right .step-indicator {
+            background: #eef3fc;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #4a5a7a;
+            white-space: nowrap;
+        }
+
+        .sub {
+            color: #5e6f8d;
+            font-size: 14px;
+            margin-bottom: 16px;
+            border-left: 3px solid #4f7cff;
+            padding-left: 12px;
+            background: #f8faff;
+            border-radius: 0 8px 8px 0;
+            line-height: 1.5;
+        }
+
+        /* ===== 字段卡片 ===== */
+        .field-card {
+            background: #f9fbfe;
+            border: 1px solid #e6edf6;
+            border-radius: 16px;
+            padding: 14px 18px 14px 14px;
+            margin-bottom: 14px;
+            transition: 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            gap: 12px;
+        }
+        .field-card:hover {
+            border-color: #c8d6e8;
+            background: #fafcff;
+        }
+        .field-card.sorting-highlight {
+            background: #e8f4fd;
+            border-color: #4f7cff;
+            box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.15);
+        }
+        .field-card.search-match {
+            border-color: #4f7cff;
+            background: #f0f6ff;
+            box-shadow: 0 0 0 2px rgba(79, 124, 255, 0.2);
+        }
+        .field-card.search-hidden {
+            display: none;
+        }
+        .field-card .match-highlight {
+            background: #ffd966;
+            padding: 0 2px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .field-order {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            gap: 2px;
+            padding-right: 4px;
+            border-right: 2px dashed #e0e8f2;
+            flex-shrink: 0;
+        }
+        .field-order .order-number {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a5a7a;
+            background: #eef3fc;
+            padding: 2px 8px;
+            border-radius: 20px;
+            min-width: 28px;
+            text-align: center;
+            user-select: none;
+            transition: 0.2s;
+        }
+        .field-order .order-number.changed {
+            background: #4f7cff;
+            color: white;
+        }
+        .field-order .order-input {
+            width: 44px;
+            padding: 4px 2px;
+            text-align: center;
+            border: 1px solid #d9e1ec;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            background: white;
+            transition: 0.15s;
+            color: #1e2a41;
+        }
+        .field-order .order-input:focus {
+            outline: none;
+            border-color: #4f7cff;
+            box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.12);
+        }
+        .field-order .order-input:hover {
+            border-color: #a0b8d4;
+        }
+        .field-order .order-hint {
+            font-size: 9px;
+            color: #a0b1cc;
+            letter-spacing: 0.3px;
+        }
+        .field-order .order-adjust {
+            display: flex;
+            gap: 4px;
+            margin-top: 2px;
+        }
+        .field-order .order-adjust button {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #d9e1ec;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            color: #4a5a7a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.15s;
+            padding: 0;
+            line-height: 1;
+        }
+        .field-order .order-adjust button:hover {
+            background: #eef3fc;
+            border-color: #a0b8d4;
+        }
+        .field-order .order-adjust button:active {
+            background: #dce6f5;
+            transform: scale(0.92);
+        }
+
+        .field-body {
+            flex: 1;
+            min-width: 0;
+        }
+        .field-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .field-label-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            flex: 1;
+            min-width: 0;
+        }
+        .field-label-group label {
+            font-weight: 500;
+            font-size: 14px;
+            color: #1e2a41;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .field-label-group .label-input-wrapper {
+            position: relative;
+            display: inline-block;
+            flex: 0 0 auto;
+            max-width: 100%;
+        }
+        .field-label-group .label-input-wrapper .label-input {
+            border: 1px solid #d9e1ec;
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 13px;
+            background: white;
+            transition: 0.15s;
+            font-family: inherit;
+            color: #1e2a41;
+            box-sizing: border-box;
+            min-width: 60px;
+            width: 60px;
+        }
+        .field-label-group .label-input-wrapper .label-input:focus {
+            outline: none;
+            border-color: #4f7cff;
+            box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.1);
+        }
+        .field-label-group .label-input-wrapper .label-input:hover {
+            border-color: #a0b8d4;
+        }
+        .field-label-group .label-input-wrapper .label-input[title] {
+            cursor: help;
+        }
+
+        .label-highlight {
+            display: block;
+            font-size: 11px;
+            color: #4f7cff;
+            margin-top: 2px;
+            word-break: break-all;
+            background: #f0f6ff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border-left: 3px solid #4f7cff;
+            max-width: 300px;
+        }
+
+        .field-actions {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .field-actions button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 6px;
+            border-radius: 8px;
+            transition: 0.15s;
+            color: #7a8aa8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .field-actions .delete-btn:hover {
+            background: #fee8e8;
+            color: #c0392b;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+        .input-row .input-wrapper {
+            flex: 1;
+            position: relative;
+            min-width: 0;
+        }
+        .input-row .input-wrapper textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d9e1ec;
+            border-radius: 12px;
+            font-size: 15px;
+            background: white;
+            transition: 0.2s;
+            font-family: inherit;
+            resize: none;
+            min-height: 46px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: block;
+            box-sizing: border-box;
+            line-height: 1.5;
+        }
+        .input-row .input-wrapper textarea:focus {
+            outline: none;
+            border-color: #4f7cff;
+            box-shadow: 0 0 0 4px rgba(79, 124, 255, 0.10);
+        }
+        .input-row .input-wrapper textarea::-webkit-scrollbar {
+            width: 6px;
+        }
+        .input-row .input-wrapper textarea::-webkit-scrollbar-track {
+            background: #f0f4f9;
+            border-radius: 4px;
+        }
+        .input-row .input-wrapper textarea::-webkit-scrollbar-thumb {
+            background: #c8d6e8;
+            border-radius: 4px;
+        }
+        .input-row .input-wrapper textarea::-webkit-scrollbar-thumb:hover {
+            background: #a0b8d4;
+        }
+
+        .copy-btn {
+            flex-shrink: 0;
+            width: 46px;
+            height: 46px;
+            border: none;
+            background: #eef3fc;
+            border-radius: 12px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e2a41;
+            transition: 0.15s;
+            border: 1px solid transparent;
+            align-self: stretch;
+        }
+        .copy-btn:hover {
+            background: #dfe8f7;
+            transform: scale(0.95);
+        }
+        .copy-btn:active {
+            background: #ccd9ef;
+            transform: scale(0.90);
+        }
+        .copy-btn.copied {
+            background: #d3f0df;
+            color: #0f6e3f;
+            border-color: #9ed9b9;
+        }
+
+        .char-count {
+            font-size: 12px;
+            color: #8895b0;
+            margin-left: 4px;
+            font-weight: 400;
+            flex-shrink: 0;
+        }
+
+        .toast {
+            margin-top: 18px;
+            padding: 12px 16px;
+            background: #1e2a41;
+            color: white;
+            border-radius: 16px;
+            font-size: 14px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: 0.25s ease;
+            pointer-events: none;
+            font-weight: 450;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .empty-hint {
+            text-align: center;
+            color: #a0b1cc;
+            padding: 30px 10px;
+            font-size: 15px;
+            border: 2px dashed #e0e8f2;
+            border-radius: 16px;
+            margin-bottom: 14px;
+        }
+        .hidden-file-input {
+            display: none;
+        }
+        .field-card {
+            transition: transform 0.25s ease, opacity 0.25s ease, border-color 0.3s ease, background 0.3s ease;
+        }
+
+        .field-card.scroll-target {
+            animation: scrollPulse 0.8s ease 3;
+        }
+        @keyframes scrollPulse {
+            0%, 100% { border-color: #4f7cff; background: #f0f6ff; }
+            50% { border-color: #ff6b6b; background: #fff5f5; box-shadow: 0 0 20px rgba(79, 124, 255, 0.3); }
+        }
+
+        /* ===== 响应式：移动端侧边栏变为底部 ===== */
+        @media (max-width: 860px) {
+            .main-wrapper {
+                flex-direction: column-reverse;
+                align-items: stretch;
+            }
+            .sidebar {
+                position: static;
+                transform: none;
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                padding: 12px 14px;
+                gap: 4px;
+                border-radius: 16px;
+                top: auto;
+                max-height: none;
+                overflow-y: visible;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            }
+            .sidebar .brand {
+                width: 100%;
+                padding-bottom: 6px;
+                margin-bottom: 2px;
+                font-size: 14px;
+                border-bottom: 1px solid #ecf1f8;
+            }
+            .sidebar .sidebar-search {
+                width: 100%;
+                padding: 4px 10px;
+                margin-bottom: 2px;
+            }
+            .sidebar .sidebar-search input {
+                font-size: 13px;
+            }
+            .sidebar .sidebar-btn {
+                flex: 1;
+                min-width: 50px;
+                justify-content: center;
+                padding: 7px 8px;
+                font-size: 12px;
+                border-radius: 10px;
+            }
+            .sidebar .sidebar-btn .icon {
+                font-size: 14px;
+                width: 18px;
+            }
+            .sidebar .sidebar-version {
+                display: none;
+            }
+            .sidebar .sidebar-divider {
+                display: none;
+            }
+            .container {
+                padding: 20px 16px;
+            }
+            .header h1 {
+                font-size: 18px;
+            }
+            .sub {
+                font-size: 13px;
+                padding-left: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar .sidebar-btn {
+                font-size: 11px;
+                padding: 5px 6px;
+                min-width: 40px;
+            }
+            .sidebar .sidebar-btn .icon {
+                font-size: 13px;
+                width: 16px;
+            }
+            .container {
+                padding: 16px 12px;
+            }
+            .header h1 {
+                font-size: 16px;
+            }
+            .field-card {
+                flex-direction: column;
+                padding: 12px 14px;
+                gap: 8px;
+            }
+            .field-order {
+                flex-direction: row;
+                border-right: none;
+                border-bottom: 2px dashed #e0e8f2;
+                padding-right: 0;
+                padding-bottom: 6px;
+                min-width: unset;
+                justify-content: flex-start;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .field-order .order-hint {
+                display: none;
+            }
+            .field-order .order-adjust {
+                margin-top: 0;
+            }
+            .input-row {
+                flex-wrap: wrap;
+            }
+            .copy-btn {
+                width: 100%;
+                height: 42px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+
+    <!-- ===== 侧边栏 ===== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <span>🐱</span> 土拨猫
+        </div>
+
+        <!-- 侧边栏搜索 -->
+        <div class="sidebar-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="sidebarSearchInput" placeholder="搜索标签名..." autocomplete="off" />
+            <button class="search-clear" id="sidebarSearchClear">✕</button>
+            <span class="search-count" id="sidebarSearchCount">0</span>
+        </div>
+
+        <button id="undoBtn" class="sidebar-btn undo-btn" disabled>
+            <span class="icon">↩️</span> 返回上一步
+        </button>
+
+        <button id="addFieldBtn" class="sidebar-btn add-btn">
+            <span class="icon">➕</span> 增加字段
+        </button>
+
+        <div class="sidebar-divider"></div>
+
+        <button id="saveFileBtn" class="sidebar-btn save-btn">
+            <span class="icon">💾</span> 保存到文件
+        </button>
+
+        <button id="loadFileBtn" class="sidebar-btn load-btn">
+            <span class="icon">📂</span> 导入文件
+        </button>
+
+        <div class="sidebar-divider"></div>
+
+        <button id="clearAllBtn" class="sidebar-btn clear-btn">
+            <span class="icon">🗑️</span> 清空所有
+        </button>
+
+        <div class="sidebar-version">版本信息：2026.08.05.v01</div>
+    </aside>
+
+    <!-- ===== 主内容区 ===== -->
+    <div class="container">
+        <div class="header">
+            <h1>🐱 土拨猫 - 智能表单填写助手</h1>
+            <div class="header-right">
+                <span class="step-indicator" id="stepIndicator">📌 0 步</span>
+            </div>
+        </div>
+        <div class="sub">
+            📄 一键复制 · ↩️ 支持撤销 · 🔍 快速检索 · 📝 输入框自适应大小 · 💾 可保存/导入 · ⚡ 修改序号以调整位置
+        </div>
+
+        <div id="fieldsContainer"></div>
+
+        <div id="toast" class="toast">✅ 已复制到剪贴板</div>
+    </div>
+
+    <!-- ===== 隐藏的文件输入 ===== -->
+    <input type="file" id="fileInput" class="hidden-file-input" accept=".json">
+
+</div>
+
+<script>
+    (function() {
+        // ----- 状态管理 -----
+        let fields = [];
+        let nextId = 1;
+        let isSorting = false;
+
+        // ----- 撤销系统 -----
+        let history = [];
+        let historyIndex = -1;
+        const MAX_HISTORY = 50;
+        let isUndoing = false;
+
+        // ----- DOM 引用 -----
+        const container = document.getElementById('fieldsContainer');
+        const toast = document.getElementById('toast');
+        const undoBtn = document.getElementById('undoBtn');
+        const stepIndicator = document.getElementById('stepIndicator');
+        const addBtn = document.getElementById('addFieldBtn');
+        const saveFileBtn = document.getElementById('saveFileBtn');
+        const loadFileBtn = document.getElementById('loadFileBtn');
+        const fileInput = document.getElementById('fileInput');
+        const clearBtn = document.getElementById('clearAllBtn');
+
+        // 侧边栏搜索
+        const sidebarSearchInput = document.getElementById('sidebarSearchInput');
+        const sidebarSearchClear = document.getElementById('sidebarSearchClear');
+        const sidebarSearchCount = document.getElementById('sidebarSearchCount');
+
+        const defaultFields = [
+            { id: nextId++, label: '姓名', value: '张小明' },
+            { id: nextId++, label: '邮箱', value: 'zhangxm@example.com' },
+            { id: nextId++, label: '地址', value: '上海市浦东新区软件园1号楼' }
+        ];
+
+        // ----- 辅助函数 -----
+        function showToast(msg, duration) {
+            toast.textContent = msg || '✅ 已复制到剪贴板';
+            toast.classList.add('show');
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => toast.classList.remove('show'), duration || 1800);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        function highlightText(text, keyword) {
+            if (!keyword || !text) return escapeHtml(text);
+            const escaped = escapeHtml(text);
+            const kw = escapeHtml(keyword);
+            const regex = new RegExp('(' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+            return escaped.replace(regex, '<span class="match-highlight">$1</span>');
+        }
+
+        function cloneFields(fieldsData) {
+            return fieldsData.map(f => ({
+                id: f.id,
+                label: f.label,
+                value: f.value,
+                _order: f._order || 0
+            }));
+        }
+
+        // ----- textarea 自动调整高度 -----
+        function autoResizeTextarea(textarea) {
+            if (!textarea) return;
+            textarea.style.height = 'auto';
+            const newHeight = Math.min(textarea.scrollHeight, 400);
+            textarea.style.height = newHeight + 'px';
+        }
+
+        function autoResizeAllTextareas() {
+            document.querySelectorAll('.field-input').forEach(el => {
+                autoResizeTextarea(el);
+            });
+        }
+
+        // ----- 标签名宽度自适应 -----
+        function adjustLabelWidth(inputEl) {
+            if (!inputEl) return;
+            const text = inputEl.value || inputEl.placeholder || '';
+            const minWidth = 60;
+            const maxWidth = 300;
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const computedStyle = window.getComputedStyle(inputEl);
+            const font = computedStyle.font || 
+                computedStyle.fontSize + ' ' + computedStyle.fontFamily;
+            ctx.font = font;
+            const metrics = ctx.measureText(text);
+            let width = metrics.width + 20;
+            width = Math.max(minWidth, Math.min(maxWidth, width));
+            width = Math.ceil(width + 4);
+            inputEl.style.width = width + 'px';
+        }
+
+        function adjustAllLabelWidths() {
+            document.querySelectorAll('.label-input').forEach(el => {
+                adjustLabelWidth(el);
+            });
+        }
+
+        // ----- 序号微调（↑ = -1，↓ = +1）-----
+        function adjustOrder(fieldId, delta) {
+            const field = fields.find(f => f.id === fieldId);
+            if (!field) return;
+            const currentIndex = fields.indexOf(field);
+            const currentOrder = currentIndex + 1;
+            const newOrder = Math.max(1, Math.min(fields.length, currentOrder + delta));
+            
+            if (newOrder === currentOrder) {
+                showToast(delta > 0 ? '⚠️ 已经是最后一个' : '⚠️ 已经是第一个', 1000);
+                return;
+            }
+            
+            insertSortFields(fieldId, newOrder);
+        }
+
+        // ----- 撤销系统 -----
+        function pushHistory() {
+            if (isUndoing) return;
+            if (historyIndex < history.length - 1) {
+                history = history.slice(0, historyIndex + 1);
+            }
+            const snapshot = cloneFields(fields);
+            history.push(snapshot);
+            if (history.length > MAX_HISTORY) {
+                history.shift();
+            }
+            historyIndex = history.length - 1;
+            updateUndoButton();
+        }
+
+        function undo() {
+            if (historyIndex <= 0) {
+                showToast('⚠️ 没有更早的记录', 1200);
+                return;
+            }
+            isUndoing = true;
+            historyIndex--;
+            const snapshot = history[historyIndex];
+            fields = snapshot.map(f => ({ ...f }));
+            fields.forEach(f => {
+                if (f.id >= nextId) nextId = f.id + 1;
+            });
+            saveToStorage();
+            render();
+            updateUndoButton();
+            isUndoing = false;
+            showToast('↩️ 已返回上一步', 1200);
+            // 清空搜索
+            sidebarSearchInput.value = '';
+            performSearch('');
+        }
+
+        function updateUndoButton() {
+            const canUndo = historyIndex > 0;
+            undoBtn.disabled = !canUndo;
+            stepIndicator.textContent = `📌 ${historyIndex + 1} / ${history.length} 步`;
+            if (history.length === 0) {
+                stepIndicator.textContent = '📌 0 步';
+            }
+        }
+
+        function resetHistory() {
+            history = [];
+            historyIndex = -1;
+            const snapshot = cloneFields(fields);
+            history.push(snapshot);
+            historyIndex = 0;
+            updateUndoButton();
+        }
+
+        function recordAction() {
+            if (!isUndoing) {
+                pushHistory();
+            }
+        }
+
+        // ----- 数据持久化 -----
+        function saveToStorage() {
+            try {
+                localStorage.setItem('dynamicCopyFields', JSON.stringify(fields));
+                localStorage.setItem('dynamicCopyNextId', String(nextId));
+                const historyToSave = history.slice(-20);
+                localStorage.setItem('dynamicCopyHistory', JSON.stringify(historyToSave));
+                localStorage.setItem('dynamicCopyHistoryIndex', String(historyIndex));
+            } catch (e) { /* ignore */ }
+        }
+
+        function loadFromStorage() {
+            try {
+                const raw = localStorage.getItem('dynamicCopyFields');
+                const idRaw = localStorage.getItem('dynamicCopyNextId');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        fields = parsed;
+                        if (idRaw) nextId = parseInt(idRaw, 10) || nextId;
+                        
+                        const historyRaw = localStorage.getItem('dynamicCopyHistory');
+                        const historyIdxRaw = localStorage.getItem('dynamicCopyHistoryIndex');
+                        if (historyRaw) {
+                            const parsedHistory = JSON.parse(historyRaw);
+                            if (Array.isArray(parsedHistory) && parsedHistory.length > 0) {
+                                history = parsedHistory;
+                                if (historyIdxRaw) {
+                                    historyIndex = parseInt(historyIdxRaw, 10);
+                                    if (historyIndex >= history.length) historyIndex = history.length - 1;
+                                } else {
+                                    historyIndex = history.length - 1;
+                                }
+                                const lastSnapshot = history[historyIndex];
+                                if (lastSnapshot) {
+                                    if (lastSnapshot.length !== fields.length || 
+                                        JSON.stringify(lastSnapshot) !== JSON.stringify(cloneFields(fields))) {
+                                        pushHistory();
+                                    }
+                                }
+                                updateUndoButton();
+                                return true;
+                            }
+                        }
+                        resetHistory();
+                        return true;
+                    }
+                }
+            } catch (e) { /* ignore */ }
+            return false;
+        }
+
+        // ----- 插入式排序 -----
+        function insertSortFields(movedFieldId, targetOrder) {
+            if (isSorting) return;
+            isSorting = true;
+
+            const movedIndex = fields.findIndex(f => f.id === movedFieldId);
+            if (movedIndex === -1) {
+                isSorting = false;
+                return;
+            }
+
+            const movedField = fields[movedIndex];
+            const currentOrder = movedIndex + 1;
+
+            if (targetOrder === currentOrder) {
+                isSorting = false;
+                return;
+            }
+
+            const maxOrder = fields.length;
+            if (targetOrder < 1) targetOrder = 1;
+            if (targetOrder > maxOrder) targetOrder = maxOrder;
+
+            fields.splice(movedIndex, 1);
+            let insertIndex = targetOrder - 1;
+            if (targetOrder > currentOrder) {
+                insertIndex = targetOrder - 1;
+            }
+            if (insertIndex < 0) insertIndex = 0;
+            if (insertIndex > fields.length) insertIndex = fields.length;
+
+            fields.splice(insertIndex, 0, movedField);
+            fields.forEach((f, idx) => {
+                f._order = idx + 1;
+            });
+
+            saveToStorage();
+            render();
+            isSorting = false;
+            recordAction();
+            showToast(`✅ 已移动到第 ${targetOrder} 位`, 1200);
+            const keyword = sidebarSearchInput.value.trim();
+            if (keyword) {
+                performSearch(keyword);
+            }
+            adjustAllLabelWidths();
+            autoResizeAllTextareas();
+        }
+
+        // ----- 处理序号输入（失焦时触发排序）-----
+        function handleOrderInputBlur(inputEl) {
+            const id = parseInt(inputEl.dataset.id, 10);
+            const val = parseInt(inputEl.value, 10);
+            
+            const field = fields.find(f => f.id === id);
+            if (!field) return;
+            
+            const currentIndex = fields.indexOf(field);
+            const currentOrder = currentIndex + 1;
+            
+            if (isNaN(val) || val < 1) {
+                inputEl.value = currentOrder;
+                const orderNum = inputEl.closest('.field-card').querySelector('.order-number');
+                orderNum.textContent = '#' + currentOrder;
+                orderNum.classList.remove('changed');
+                return;
+            }
+            
+            let targetOrder = val;
+            const maxOrder = fields.length;
+            if (targetOrder > maxOrder) targetOrder = maxOrder;
+            if (targetOrder < 1) targetOrder = 1;
+            
+            if (targetOrder === currentOrder) {
+                inputEl.value = currentOrder;
+                const orderNum = inputEl.closest('.field-card').querySelector('.order-number');
+                orderNum.textContent = '#' + currentOrder;
+                orderNum.classList.remove('changed');
+                return;
+            }
+            
+            insertSortFields(id, targetOrder);
+        }
+
+        function handleOrderInputKeydown(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const input = e.target;
+                input.blur();
+            }
+        }
+
+        function handleOrderInputInput(inputEl) {
+            const val = parseInt(inputEl.value, 10);
+            const orderNum = inputEl.closest('.field-card').querySelector('.order-number');
+            
+            if (isNaN(val) || val < 1) {
+                orderNum.textContent = '#?';
+                orderNum.classList.add('changed');
+                return;
+            }
+            
+            const maxVal = fields.length;
+            let displayVal = val;
+            if (displayVal > maxVal) displayVal = maxVal;
+            orderNum.textContent = '#' + displayVal;
+            orderNum.classList.add('changed');
+        }
+
+        // ----- 搜索功能（同时更新侧边栏计数）-----
+        function performSearch(keyword) {
+            const trimmed = keyword.trim();
+            const cards = container.querySelectorAll('.field-card');
+            let matchCount = 0;
+            let firstMatch = null;
+
+            cards.forEach(card => {
+                card.classList.remove('search-match', 'search-hidden');
+            });
+
+            document.querySelectorAll('.label-highlight').forEach(el => el.remove());
+
+            if (!trimmed) {
+                sidebarSearchCount.textContent = '0';
+                sidebarSearchClear.classList.remove('visible');
+                return;
+            }
+
+            const labelInputs = container.querySelectorAll('.label-input');
+            labelInputs.forEach((input, index) => {
+                const card = input.closest('.field-card');
+                const label = input.value || '';
+                const isMatch = label.toLowerCase().includes(trimmed.toLowerCase());
+                
+                if (isMatch) {
+                    card.classList.add('search-match');
+                    matchCount++;
+                    if (!firstMatch) firstMatch = card;
+
+                    const wrapper = input.closest('.label-input-wrapper');
+                    const highlightSpan = document.createElement('span');
+                    highlightSpan.className = 'label-highlight';
+                    highlightSpan.innerHTML = '🔍 ' + highlightText(label, trimmed);
+                    wrapper.appendChild(highlightSpan);
+                } else {
+                    card.classList.add('search-hidden');
+                }
+            });
+
+            sidebarSearchCount.textContent = matchCount;
+            sidebarSearchClear.classList.toggle('visible', matchCount > 0);
+
+            if (firstMatch) {
+                setTimeout(() => {
+                    firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstMatch.classList.add('scroll-target');
+                    setTimeout(() => {
+                        firstMatch.classList.remove('scroll-target');
+                    }, 2500);
+                }, 100);
+            }
+        }
+
+        // ----- 导出/导入 -----
+        function exportToFile() {
+            if (fields.length === 0) {
+                showToast('⚠️ 没有数据可保存', 1500);
+                return;
+            }
+            const exportData = {
+                version: '1.0',
+                exportedAt: new Date().toISOString(),
+                fields: fields.map(f => ({
+                    label: f.label,
+                    value: f.value
+                }))
+            };
+            const jsonStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const now = new Date();
+            const timestamp = 
+                String(now.getFullYear()) + 
+                String(now.getMonth() + 1).padStart(2, '0') + 
+                String(now.getDate()).padStart(2, '0') + '_' +
+                String(now.getHours()).padStart(2, '0') + 
+                String(now.getMinutes()).padStart(2, '0');
+            a.download = `表单数据_${timestamp}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('💾 文件保存成功！', 1500);
+        }
+
+        function importFromFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.fields || !Array.isArray(data.fields) || data.fields.length === 0) {
+                        showToast('❌ 文件格式无效或为空', 1800);
+                        return;
+                    }
+                    const valid = data.fields.every(f => 
+                        f.hasOwnProperty('label') && f.hasOwnProperty('value')
+                    );
+                    if (!valid) {
+                        showToast('❌ 文件格式不正确', 1800);
+                        return;
+                    }
+                    if (!confirm(`确定要导入 ${data.fields.length} 个字段吗？\n当前数据将被替换。`)) {
+                        return;
+                    }
+                    fields = data.fields.map((f, idx) => ({
+                        id: nextId++,
+                        label: String(f.label || '未命名'),
+                        value: String(f.value || ''),
+                        _order: idx + 1
+                    }));
+                    saveToStorage();
+                    resetHistory();
+                    render();
+                    sidebarSearchInput.value = '';
+                    performSearch('');
+                    adjustAllLabelWidths();
+                    autoResizeAllTextareas();
+                    showToast(`✅ 成功导入 ${fields.length} 个字段`, 1500);
+                } catch (err) {
+                    showToast('❌ 文件解析失败，请确保是有效的 JSON 文件', 1800);
+                    console.error('导入错误:', err);
+                }
+            };
+            reader.onerror = function() {
+                showToast('❌ 读取文件失败', 1500);
+            };
+            reader.readAsText(file);
+        }
+
+        // ----- 渲染引擎 -----
+        function render() {
+            if (fields.length === 0) {
+                container.innerHTML = `<div class="empty-hint">📭 还没有字段，点击下方「增加字段」添加</div>`;
+                sidebarSearchCount.textContent = '0';
+                sidebarSearchClear.classList.remove('visible');
+                return;
+            }
+
+            fields.forEach((f, idx) => {
+                if (f._order === undefined) f._order = idx + 1;
+            });
+
+            let html = '';
+            fields.forEach((field, index) => {
+                const fieldId = 'input_' + field.id;
+                const countId = 'count_' + field.id;
+                const displayOrder = field._order || (index + 1);
+                const escapedLabel = escapeHtml(field.label);
+                const escapedValue = escapeHtml(field.value);
+
+                html += `
+                    <div class="field-card" data-index="${index}" data-id="${field.id}">
+                        <div class="field-order">
+                            <span class="order-number">#${displayOrder}</span>
+                            <input type="number" class="order-input" data-id="${field.id}" value="${displayOrder}" min="1" max="${fields.length}" />
+                            <div class="order-adjust">
+                                <button class="order-up" data-id="${field.id}" title="序号-1（上移）">↑</button>
+                                <button class="order-down" data-id="${field.id}" title="序号+1（下移）">↓</button>
+                            </div>
+                            <span class="order-hint">序号</span>
+                        </div>
+                        <div class="field-body">
+                            <div class="field-header">
+                                <div class="field-label-group">
+                                    <label for="${fieldId}">
+                                        <span>🏷️</span>
+                                    </label>
+                                    <div class="label-input-wrapper">
+                                        <input type="text" class="label-input" data-id="${field.id}" value="${escapedLabel}" placeholder="标签名" />
+                                    </div>
+                                    <span class="char-count" id="${countId}">${field.value.length} 字符</span>
+                                </div>
+                                <div class="field-actions">
+                                    <button class="delete-btn" data-id="${field.id}" title="删除字段">✕</button>
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-wrapper">
+                                    <textarea id="${fieldId}" class="field-input" data-id="${field.id}" placeholder="输入内容...">${escapedValue}</textarea>
+                                </div>
+                                <button class="copy-btn" data-id="${field.id}" aria-label="复制">📄</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // ---- 事件绑定 ----
+            container.querySelectorAll('.order-input').forEach(el => {
+                el.addEventListener('input', function() {
+                    handleOrderInputInput(this);
+                });
+                el.addEventListener('blur', function() {
+                    handleOrderInputBlur(this);
+                });
+                el.addEventListener('keydown', function(e) {
+                    handleOrderInputKeydown(e);
+                });
+                el.addEventListener('focus', function() {
+                    this.select();
+                });
+            });
+
+            container.querySelectorAll('.order-up').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = parseInt(this.dataset.id, 10);
+                    adjustOrder(id, -1);
+                });
+            });
+            container.querySelectorAll('.order-down').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = parseInt(this.dataset.id, 10);
+                    adjustOrder(id, 1);
+                });
+            });
+
+            container.querySelectorAll('.field-input').forEach(el => {
+                let oldValue = el.value;
+                setTimeout(() => {
+                    autoResizeTextarea(el);
+                }, 10);
+
+                el.addEventListener('focus', function() {
+                    oldValue = this.value;
+                });
+                el.addEventListener('input', function() {
+                    const id = parseInt(this.dataset.id, 10);
+                    const field = fields.find(f => f.id === id);
+                    if (field) {
+                        field.value = this.value;
+                        const countEl = document.getElementById('count_' + id);
+                        if (countEl) countEl.textContent = this.value.length + ' 字符';
+                        saveToStorage();
+                    }
+                    autoResizeTextarea(this);
+                });
+                el.addEventListener('blur', function() {
+                    const id = parseInt(this.dataset.id, 10);
+                    const field = fields.find(f => f.id === id);
+                    if (field && this.value !== oldValue) {
+                        recordAction();
+                    }
+                    autoResizeTextarea(this);
+                });
+            });
+
+            container.querySelectorAll('.label-input').forEach(el => {
+                let oldLabel = el.value;
+                setTimeout(() => {
+                    adjustLabelWidth(el);
+                }, 10);
+
+                el.addEventListener('focus', function() {
+                    oldLabel = this.value;
+                });
+                el.addEventListener('input', function() {
+                    adjustLabelWidth(this);
+                });
+                el.addEventListener('change', function() {
+                    const id = parseInt(this.dataset.id, 10);
+                    const field = fields.find(f => f.id === id);
+                    if (field) {
+                        const newLabel = this.value.trim() || '未命名';
+                        if (newLabel !== oldLabel) {
+                            field.label = newLabel;
+                            saveToStorage();
+                            recordAction();
+                            const keyword = sidebarSearchInput.value.trim();
+                            if (keyword) {
+                                performSearch(keyword);
+                            }
+                        }
+                    }
+                    adjustLabelWidth(this);
+                });
+                el.addEventListener('blur', function() {
+                    if (!this.value.trim()) {
+                        const id = parseInt(this.dataset.id, 10);
+                        const field = fields.find(f => f.id === id);
+                        if (field) {
+                            this.value = field.label;
+                            adjustLabelWidth(this);
+                        }
+                    }
+                    adjustLabelWidth(this);
+                });
+            });
+
+            container.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.id, 10);
+                    const field = fields.find(f => f.id === id);
+                    if (!field) return;
+                    const text = field.value;
+                    if (!text || text.trim() === '') {
+                        showToast('⚠️ 内容为空', 1200);
+                        return;
+                    }
+                    copyToClipboard(text, this);
+                });
+            });
+
+            container.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.id, 10);
+                    if (fields.length <= 1) {
+                        showToast('⚠️ 至少保留一个字段', 1200);
+                        return;
+                    }
+                    if (confirm('确定要删除这个字段吗？')) {
+                        fields = fields.filter(f => f.id !== id);
+                        fields.forEach((f, idx) => f._order = idx + 1);
+                        saveToStorage();
+                        render();
+                        recordAction();
+                        showToast('🗑️ 已删除', 1000);
+                        const keyword = sidebarSearchInput.value.trim();
+                        if (keyword) {
+                            performSearch(keyword);
+                        }
+                        adjustAllLabelWidths();
+                        autoResizeAllTextareas();
+                    }
+                });
+            });
+
+            const keyword = sidebarSearchInput.value.trim();
+            if (keyword) {
+                performSearch(keyword);
+            } else {
+                sidebarSearchCount.textContent = '0';
+                sidebarSearchClear.classList.remove('visible');
+            }
+
+            adjustAllLabelWidths();
+            autoResizeAllTextareas();
+        }
+
+        // ----- 复制核心 -----
+        function copyToClipboard(text, btnEl) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    copySuccessFeedback(btnEl);
+                }).catch(() => {
+                    fallbackCopy(text, btnEl);
+                });
+            } else {
+                fallbackCopy(text, btnEl);
+            }
+        }
+
+        function fallbackCopy(text, btnEl) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;opacity:0;left:-9999px;top:-9999px;';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                if (document.execCommand('copy')) {
+                    copySuccessFeedback(btnEl);
+                } else {
+                    showToast('❌ 复制失败', 1200);
+                }
+            } catch (e) {
+                showToast('❌ 复制失败', 1200);
+            }
+            document.body.removeChild(ta);
+        }
+
+        function copySuccessFeedback(btnEl) {
+            btnEl.classList.add('copied');
+            btnEl.textContent = '✅';
+            setTimeout(() => {
+                btnEl.classList.remove('copied');
+                btnEl.textContent = '📄';
+            }, 1200);
+            showToast('✅ 已复制到剪贴板', 1200);
+        }
+
+        // ----- 字段管理操作 -----
+        function addField() {
+            const newField = {
+                id: nextId++,
+                label: '新字段 ' + (fields.length + 1),
+                value: '',
+                _order: fields.length + 1
+            };
+            fields.push(newField);
+            saveToStorage();
+            render();
+            recordAction();
+            const cards = container.querySelectorAll('.field-card');
+            if (cards.length > 0) {
+                cards[cards.length - 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const orderInput = cards[cards.length - 1].querySelector('.order-input');
+                if (orderInput) setTimeout(() => orderInput.focus(), 300);
+            }
+            adjustAllLabelWidths();
+            autoResizeAllTextareas();
+            showToast('➕ 已添加新字段', 1000);
+        }
+
+        function clearAll() {
+            if (fields.length === 0) return;
+            if (!confirm('确定要清空所有字段吗？此操作不可撤销！')) return;
+            fields = [];
+            saveToStorage();
+            render();
+            recordAction();
+            showToast('🗑️ 已清空所有', 1200);
+            sidebarSearchInput.value = '';
+            performSearch('');
+        }
+
+        // ----- 窗口变化时重新调整 -----
+        let resizeTimer = null;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                adjustAllLabelWidths();
+                autoResizeAllTextareas();
+            }, 200);
+        });
+
+        // ----- 初始化 -----
+        function init() {
+            const loaded = loadFromStorage();
+            if (!loaded) {
+                fields = defaultFields.map((f, idx) => ({ ...f, id: nextId++, _order: idx + 1 }));
+                resetHistory();
+            } else {
+                if (history.length === 0) {
+                    resetHistory();
+                }
+                updateUndoButton();
+            }
+            render();
+
+            // 侧边栏搜索事件
+            sidebarSearchInput.addEventListener('input', function() {
+                performSearch(this.value);
+            });
+            sidebarSearchClear.addEventListener('click', function() {
+                sidebarSearchInput.value = '';
+                performSearch('');
+                sidebarSearchInput.focus();
+            });
+
+            undoBtn.addEventListener('click', undo);
+            addBtn.addEventListener('click', addField);
+            saveFileBtn.addEventListener('click', exportToFile);
+            loadFileBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', function(e) {
+                if (this.files && this.files.length > 0) {
+                    importFromFile(this.files[0]);
+                }
+                this.value = '';
+            });
+            clearBtn.addEventListener('click', clearAll);
+
+            console.log('📋 土拨猫已启动，字段数:', fields.length);
+            console.log('📌 历史记录数:', history.length);
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
