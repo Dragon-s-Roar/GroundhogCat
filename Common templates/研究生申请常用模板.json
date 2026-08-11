@@ -1,0 +1,186 @@
+{
+  "version": "1.0",
+  "exportedAt": "2026-08-05T13:17:04.199Z",
+  "fields": [
+    {
+      "label": "姓名",
+      "value": ""
+    },
+    {
+      "label": "姓名拼音",
+      "value": ""
+    },
+    {
+      "label": "英文名称",
+      "value": ""
+    },
+    {
+      "label": "身份证号码",
+      "value": ""
+    },
+    {
+      "label": "出生日期",
+      "value": ""
+    },
+    {
+      "label": "政治面貌",
+      "value": ""
+    },
+    {
+      "label": "出生地",
+      "value": ""
+    },
+    {
+      "label": "籍贯地",
+      "value": ""
+    },
+    {
+      "label": "籍贯邮政编码",
+      "value": ""
+    },
+    {
+      "label": "户口所在地",
+      "value": ""
+    },
+    {
+      "label": "档案所在单位",
+      "value": ""
+    },
+    {
+      "label": "档案所在单位地址",
+      "value": ""
+    },
+    {
+      "label": "家庭地址邮政编码",
+      "value": ""
+    },
+    {
+      "label": "移动电话",
+      "value": ""
+    },
+    {
+      "label": "学校邮箱",
+      "value": ""
+    },
+    {
+      "label": "qq邮箱",
+      "value": ""
+    },
+    {
+      "label": "父亲单位 职业",
+      "value": ""
+    },
+    {
+      "label": "父亲电话",
+      "value": ""
+    },
+    {
+      "label": "母亲单位 职业",
+      "value": ""
+    },
+    {
+      "label": "母亲电话",
+      "value": ""
+    },
+    {
+      "label": "新字段 21",
+      "value": ""
+    },
+    {
+      "label": "本科专业",
+      "value": ""
+    },
+    {
+      "label": "辅导员",
+      "value": ""
+    },
+    {
+      "label": "辅导员电话",
+      "value": ""
+    },
+    {
+      "label": "入学年月",
+      "value": ""
+    },
+    {
+      "label": "毕业年月",
+      "value": ""
+    },
+    {
+      "label": "总绩点",
+      "value": ""
+    },
+    {
+      "label": "百分制成绩",
+      "value": ""
+    },
+    {
+      "label": "专业成绩排名",
+      "value": ""
+    },
+    {
+      "label": "年级成绩排名",
+      "value": ""
+    },
+    {
+      "label": "专业总人数",
+      "value": ""
+    },
+    {
+      "label": "CET4分数",
+      "value": ""
+    },
+    {
+      "label": "CET4时间",
+      "value": ""
+    },
+    {
+      "label": "CET6分数",
+      "value": ""
+    },
+    {
+      "label": "CET6时间",
+      "value": ""
+    },
+    {
+      "label": "高中简历",
+      "value": ""
+    },
+    {
+      "label": "大学简历",
+      "value": ""
+    },
+    {
+      "label": "爱好及特长",
+      "value": ""
+    },
+    {
+      "label": "本科获奖情况1",
+      "value": ""
+    },
+    {
+      "label": "本科获奖情况2",
+      "value": ""
+    },
+    {
+      "label": "学术成果",
+      "value": ""
+    },
+    {
+      "label": "备注1",
+      "value": ""
+    },
+    {
+      "label": "备注2",
+      "value": ""
+    },
+    {
+      "label": "发表论文和其他研究成果情况(1000字以内)",
+      "value": ""
+    },
+    {
+      "label": "科研经历",
+      "value": ""
+    }
+  ]
+}
